@@ -1,0 +1,21 @@
+{
+  "name": "webpack-manifest-generator",
+  "version": "0.0.1",
+  "description": "Webpack Plugin that generates a manifest of bundled files.",
+  "main": "index.js",
+  "keywords": [
+    "webpack",
+    "manifest",
+    "plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/influitive/webpack-manifest-generator"
+  },
+  "author": "David Mills",
+  "license": "ISC",
+  "dependencies": {
+    "fs": "0.0.2",
+    "lodash": "^3.10.1"
+  }
+}
