@@ -1,5 +1,5 @@
 {
-  "name": "webpack-manifest-generator",
+  "name": "@mtfe/webpack-manifest-generator",
   "version": "0.0.2",
   "description": "Webpack Plugin that generates a manifest of bundled files.",
   "main": "index.js",
