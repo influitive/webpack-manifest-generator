@@ -15,7 +15,6 @@
   "author": "David Mills",
   "license": "ISC",
   "dependencies": {
-    "fs": "0.0.2",
-    "lodash": "^3.10.1"
+    "lodash": "^4.7.0"
   }
 }
