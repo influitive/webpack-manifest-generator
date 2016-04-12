@@ -1,8 +1,11 @@
+'use strict';
 const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
 
 const forOwn = require('lodash/forOwn');
+
+const extmap = '.map';
 
 function ManifestGeneratorPlugin(outputPath) {
   if (!outputPath) {
@@ -19,22 +22,17 @@ ManifestGeneratorPlugin.prototype.apply = function (compiler) {
     modules: false
   };
 
-  compiler.plugin('done', (stats) => {
-    const data = stats.toJson(options);
+  compiler.plugin('after-emit', (compilation, callback) => {
+    const data = compilation.getStats().toJson(options);
     const assets = data.assetsByChunkName;
     const outputData = {};
 
     function set(item, key) {
-      const ext = path.extname(item);
-      const newKey = key + ext;
-      if (outputData[newKey]) {
-        const existsItem = outputData[newKey];
-        delete outputData[newKey];
-        set(existsItem, key + path.extname(path.basename(existsItem, ext)))
-        set(item, key + path.extname(path.basename(item, ext)));
-      } else {
-        outputData[newKey] = item;
+      let ext = path.extname(item);
+      if (ext === extmap) {
+        ext = path.extname(path.basename(item, ext)) + ext;
       }
+      outputData[key + ext] = item;
     }
 
     // { index: ['index.bundle.js', 'index.bundle.css', 'index.bundle.js.map', 'index.bundle.css.map'] }
@@ -46,8 +44,12 @@ ManifestGeneratorPlugin.prototype.apply = function (compiler) {
       }
     });
 
-    mkdirp.sync(path.dirname(outputPath));
-    fs.writeFileSync(outputPath, JSON.stringify(outputData));
+    mkdirp(path.dirname(outputPath), (err) => {
+      if (err) {
+        return callback(err);
+      }
+      fs.writeFile(outputPath, JSON.stringify(outputData, null, 2), callback);
+    });
   });
 };
 
