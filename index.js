@@ -6,6 +6,7 @@ const mkdirp = require('mkdirp');
 const forOwn = require('lodash/forOwn');
 
 const extmap = '.map';
+const reHotUpdate = /\.hot-update\.js$/;
 
 function ManifestGeneratorPlugin(outputPath) {
   if (!outputPath) {
@@ -36,9 +37,12 @@ ManifestGeneratorPlugin.prototype.apply = function (compiler) {
     }
 
     // { index: ['index.bundle.js', 'index.bundle.css', 'index.bundle.js.map', 'index.bundle.css.map'] }
+    // client.e020f67dfe212e4ba38c.hot-update.js
     forOwn(assets, (value, key) => {
       if (Array.isArray(value)) {
-        value.forEach((item) => set(item, key));
+        value
+        .filter(item => !reHotUpdate.test(item))
+        .forEach((item) => set(item, key));
       } else {
         set(value, key);
       }
