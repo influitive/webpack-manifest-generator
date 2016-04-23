@@ -52,7 +52,16 @@ ManifestGeneratorPlugin.prototype.apply = function (compiler) {
       if (err) {
         return callback(err);
       }
-      fs.writeFile(outputPath, JSON.stringify(outputData, null, 2), callback);
+
+      const contents = JSON.stringify(outputData, null, 2);
+      let original;
+      try {
+        original = fs.readFileSync(outputPath, { encoding: 'utf8' });
+      } catch(err) {}
+      if (original && original === contents) {
+        return callback();
+      }
+      fs.writeFile(outputPath, contents, callback);
     });
   });
 };
