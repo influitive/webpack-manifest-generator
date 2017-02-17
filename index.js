@@ -5,14 +5,15 @@ const mkdirp = require('mkdirp');
 
 const forOwn = require('lodash/forOwn');
 
-const extmap = '.map';
 const reHotUpdate = /\.hot-update\.js$/;
+const reSourceMap = /\.map$/;
 
 function ManifestGeneratorPlugin(outputPath) {
   if (!outputPath) {
     throw new Error('outputPath is required');
   }
   this.outputPath = outputPath;
+  this.outputData = {};
 }
 
 ManifestGeneratorPlugin.prototype.apply = function (compiler) {
@@ -26,13 +27,10 @@ ManifestGeneratorPlugin.prototype.apply = function (compiler) {
   compiler.plugin('after-emit', (compilation, callback) => {
     const data = compilation.getStats().toJson(options);
     const assets = data.assetsByChunkName;
-    const outputData = {};
+    const outputData = this.outputData;
 
     function set(item, key) {
-      let ext = path.extname(item);
-      if (ext === extmap) {
-        ext = path.extname(path.basename(item, ext)) + ext;
-      }
+      const ext = path.extname(item);
       outputData[key + ext] = item;
     }
 
@@ -42,11 +40,14 @@ ManifestGeneratorPlugin.prototype.apply = function (compiler) {
       if (Array.isArray(value)) {
         value
         .filter(item => !reHotUpdate.test(item))
+        .filter(item => !reSourceMap.test(item))
         .forEach((item) => set(item, key));
       } else {
         set(value, key);
       }
     });
+
+    this.outputData = outputData;
 
     mkdirp(path.dirname(outputPath), (err) => {
       if (err) {
